@@ -1,0 +1,139 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Adriana Oliveira
+%ECE 351-51
+%Lab:
+%Due date: 
+%notes:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, subcaption, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{indentfirst}
+\usepackage{listings}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{Adriana Oliveira}
+\fancyhead[R]{ECE351}
+\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+\title{ 
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{ECE351-51: Lab 1}} 
+		\HRule{2pt} \\ [0.5cm]
+		\normalsize\textsc{September 9, 2019} \vspace*{5\baselineskip}}
+
+\date{}
+\author{\normalsize
+		Submitted By: \\
+		\normalsize Adriana Oliveira\\}
+
+\maketitle
+
+\newpage
+
+\sectionfont{\scshape}
+
+\section*{Introduction}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+This lab covers the basic aspects of python as needed for future labs. This includes an understanding of the Jupyter Notebook environment, variables, arrays, matrices, function plotting, and complex numbers. \par
+
+%\section*{Equations}
+%\hrule
+%\vspace{1cm}
+%\setlength{\parindent}{5ex}
+%Shown below are a list of the equations...\par
+
+\section*{Methodology}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+We started by learning about libraries such as "numpy" and "mathplotlib.pyplot" that should be imported at the beginning of the program. They can be used most efficiently as seen in example 1 from Lab 1 code. Also in python, If the user needed to add a comment, it should be preceded by a pound sign.\par
+
+Next we learned about variables. Types are not needed in variable definitions. When a variable is called in print(), the variable's value will be printed not the name of the variable itself. For additional information such as units to be printed a string must be added within the function as seen example 2. Lastly squaring quantities in python involves using two asterisks.\par
+
+The "numpy" library should also be used when creating arrays. In this course, these arrays are preferable over lists. An example can be seen in Lab 1 code example 3. 
+"numpy.zeros()" and "numpy.ones()" can be used to define a matrix as an array of ones and zeros. Please see example 4 for visuals.\par 
+
+Next we tackled how to plot functions in python. First the proper libraries are used. Variables are then defined and a new plot figure is created with customed sizing. Next, sub plots are created with customized features. Lastly, "plt.show()" is included for the plots to be viewed. Please see example 5.\par
+
+Complex numbers play a major part in our calculations. To manipulate them in python, we start by using the numpy library. Variables in rectangular can be written as normal. Polar variables will need np extensions as seen in example 6. The result is set to be in rectangular form. 
+\newpage
+
+\section*{Results}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+This lab gave valuable experience with a new programming language. I was able to follow along and experiment with the code supplied in the handout. Any errors made were caused by a mistype and easily corrected. \par
+
+%\section*{Error Analysis}
+%\hrule
+%\vspace{1cm}
+%\setlength{\parindent}{5ex}
+%Difficulties I faced in lab...\par
+
+\section*{Questions}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+\begin{enumerate}
+    \item For which course are you most excited in your degree? Which course have you enjoyed the most so far?
+    
+    \begin{flushleft} I really enjoyed the Circuits courses and am excited to see its correlations in ECE 320.
+    \end{flushleft}
+
+    \item Leave any feedback on clarity of the purpose, deliverables, and tasks for this lab.
+    
+    \begin{flushleft} I feel that this lab was clear and each example replicable. My only issue was figuring out how to insert code examples into my report.
+    \end{flushleft}
+\end{enumerate}
+
+
+    
+
+
+
+
+\section*{Conclusion}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+This lab gave an outline of the basics of pythons. This includes tasks such as creating variables, arrays, and plots as well as dealing with complex numbers.\par
+
+%This is a subsection format if needed
+%\vspace{-0.5cm}
+%\subsection*{Calculations}
+%\setlength{\parindent}{5ex}
+
+%To create new page
+%\newpage
+
+\end{document}
