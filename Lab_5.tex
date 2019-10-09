@@ -1,0 +1,306 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Adriana Oliveira
+%ECE 351-51
+%Lab: 5
+%Due date: 10/08/2019
+%notes: 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, subcaption, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+
+
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{indentfirst}
+\usepackage{listings}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{Adriana Oliveira}
+\fancyhead[R]{ECE351}
+\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+\title{ 
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{ECE351-51: Lab 5}} 
+		\HRule{2pt} \\ [0.5cm]
+		\normalsize\textsc{October 8, 2019} \vspace*{5\baselineskip}}
+
+\date{}
+\author{\normalsize
+		Submitted By: \\
+		\normalsize Adriana Oliveira\\}
+
+\maketitle
+
+\newpage
+
+\sectionfont{\scshape}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Introduction %%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+Before we conducted this lab, we solved for the transfer function and impulse response for the following circuit
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=10cm]{prelab.png}
+    \caption{RLC bandpass filter}
+    \label{fig:ghj}
+\end{figure}
+
+Our goal is to verify the result in the time domain using two different python functions.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Methodology%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Methodology}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+We started by reducing the RLC circuit to the form below.
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=10cm]{revised.png}
+    \caption{RLC bandpass filter in Laplace domain}
+    \label{fig:ghj}
+\end{figure}
+
+We then simplified our parallel inductor and capacitor elements and applied voltage division to solve for $v_{out}$. This results in $H(s) = (s/RC)/(s^{2}+(s/RC)+(1/LC)) = (s+2)/(s^{2}+3*s+8)$. Using the sine method, we converted the transfer function to an impulse response in the time domain. This process is available in the equation portion below. 
+
+%%%%%%%%%%%%%%%%%%%%%%% PART 1
+\vspace{-0.5cm}
+\subsection*{Part 1: Plot h(t)}
+\setlength{\parindent}{5ex}
+Fist we plot the impulse response using our hand solved impulse. This was done by creating a function for our step response and nesting it within an impulse response function. This function was then plotted over time. \par
+
+\begin{lstlisting}[language=Python, caption=Functions for hand calculations]
+#Hand calculated h(t)
+steps = 1e-5
+t = np.arange(0,1.2e-3+steps,steps)
+
+def u(t):
+    if t < 0:
+        return 0
+    if t >= 0:
+        return 1
+
+def h(t):
+    y = np.zeros((len(t), 1))
+    for i in range(len(t)):
+        y[i] = 10356*np.exp(-(5000*(t[i])))*np.sin(18584*(t[i])+(105*np.pi/180))*u(t[i])
+    return y
+    y = h(t)
+\end{lstlisting}
+ 
+ \vspace{5mm}
+ Next, we used a the scipy.signal.impulse() function to convert our transfer function. This impulse was also plotted. 
+ 
+ \begin{lstlisting}[language=Python, caption=Python function to convert to t domain]
+R = 1000
+L = .027
+C = 100e-9
+X = 1/(R*C)
+Y = 1/(L*C)
+
+
+steps = 1e-5
+t = np.arange(0,1.2e-3+steps,steps)
+
+#Python h(t)  
+num = [X,0]
+den = [1,X,Y]
+tout , yout = sig.impulse (( num , den ) , T = t )
+
+\end{lstlisting}
+ \vspace{5mm}
+The resulting plots represent h(t) for 0< t < 1.2 ms.
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=15cm]{two_plots.png}
+    \caption{Plot for h(t)}
+    \label{fig:ghj}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%%%%% PART 2
+\vspace{-\baselineskip}
+\vspace{-0.5cm}
+\subsection*{Part 2: Plotting h(t)*u(t)}
+\setlength{\parindent}{5ex}
+
+Next, we plotted the step response with the transfer function. This involved finding the step response using scipy.signal.step().
+
+ \begin{lstlisting}[language=Python, caption=Python function to convert to t domain]
+
+\end{lstlisting}
+#h(t)*u(t) 
+tout , yout = sig.step (( num , den ) , T = t )
+
+\vspace{1cm}
+This results in the following plot of h(t)*u(t) for 0< t < 1.2 ms.
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=15cm]{last.png}
+    \caption{Plot for h(t)*u(t)}
+    \label{fig:ghj}
+\end{figure}
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Equations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Equations}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{center}
+    \textbf{Sine method}
+\end{center}
+
+$$h(t) = (|g|/w)*{e^{at}}*sin(wt+{g_{angle}})$$
+
+$$ P = (-(1/RC)+((1/RC)^{2}-4*(1/LC))^(1/2))/2$$
+
+$$g = (1/RC)|_{s=P}$$
+
+$$h(t) = 10356*e^{-5000t}*sin(18584*t + 105^{o})$$
+
+ \newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Conclusion %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Conclusion}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+The plots for h(t) are the same as h(t)*u(t) except the convolution with a step function begins at zero. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Questions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Questions}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+Explain the result of the Final Value Theorem from Part 2 Task 2 in terms of the physical circuit components.
+
+The finite value theorem for this circuit equals zero. This is seen as the amplitude of the wave tapers off on the x-axis. As a result, the circuit will filter out the incoming frequency and return to a steady state. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section*{Appendix}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{lstlisting}[language=Python, caption= Part 1: Task 1]
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+This is a temporary script file.
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.signal as sig
+import control
+import pandas
+
+#Part 1: Plot impulse response of circuit
+
+#Hand calculated h(t)
+def u(t):
+    if t < 0:
+        return 0
+    if t >= 0:
+        return 1
+
+def h(t):
+    y = np.zeros((len(t), 1))
+    for i in range(len(t)):
+        y[i] = 10356*np.exp(-(5000*(t[i])))*np.sin(18584*(t[i])+(105*np.pi/180))*u(t[i])
+    return y
+    y = h(t)
+
+y = h(t)
+
+#Python h(t)  
+R = 1000
+L = .027
+C = 100e-9
+X = 1/(R*C)
+Y = 1/(L*C)
+
+steps = 1e-5
+t = np.arange(0,1.2e-3+steps,steps)
+
+
+num = [X,0]
+den = [1,X,Y]
+tout , yout = sig.impulse (( num , den ) , T = t )
+
+
+myFigSize = (10,8)
+plt.figure(figsize=myFigSize)
+
+#Graph for hand calc h(t) 
+myFigSize = (10,8)
+plt.figure(figsize=myFigSize)
+plt.subplot(1,2,1)
+plt.plot(t,y)
+plt.grid(True)
+plt.xlabel('time')
+plt.ylabel('h(t)')
+plt.title('Hand calculated h(t)')
+plt.show()
+
+#Graph for python h(t) 
+plt.subplot(1,2,2)
+plt.plot(t,yout)
+plt.grid(True)
+plt.xlabel('time')
+plt.ylabel('h(t)')
+plt.title('Python calculated h(t)')
+
+
+#Graph for h(t)*u(t) 
+tout , yout = sig.step (( num , den ) , T = t )
+
+myFigSize = (10,8)
+plt.figure(figsize=myFigSize)
+plt.subplot(2,1,1)
+plt.plot(t,yout)
+plt.grid(True)
+plt.xlabel('time')
+plt.ylabel('h(t)*u(t)')
+plt.title('Python calculated h(t)*u(t)')
+plt.show()
+
+#Final Value Theorem 
+#s = 0
+#FVT = s*((s+2)/(s^{2}+3*s+8))
+FVT = 0
+
+\end{lstlisting}
+
+\end{document}
