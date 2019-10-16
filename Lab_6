@@ -1,0 +1,372 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Adriana Oliveira
+%ECE 351-51
+%Lab: 6
+%Due date: 10/015/2019
+%notes: 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, subcaption, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+
+
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{indentfirst}
+\usepackage{listings}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{Adriana Oliveira}
+\fancyhead[R]{ECE351}
+\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+\title{ 
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{ECE351-51: Lab 6}} 
+		\HRule{2pt} \\ [0.5cm]
+		\normalsize\textsc{October 15, 2019} \vspace*{5\baselineskip}}
+
+\date{}
+\author{\normalsize
+		Submitted By: \\
+		\normalsize Adriana Oliveira\\}
+
+\maketitle
+
+\newpage
+
+\sectionfont{\scshape}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Introduction %%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+This lab takes a closer look at different ways to solve for partial fraction expansions. We will cover how to solve these by hand as well as with predefined python funcitons. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Methodology%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Methodology}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+Before the lab began, we hand solved the transfer function from the following differential equation. 
+
+$$y^{''}(t) + 10y^{'}(t) + 24y(t) = x^{''}(t) + 6x^{'}(t) + 12x(t)$$
+
+We assumed that all initial conditions were zero, and continued our calculations by solving for y(t). All work can be found under equations. 
+
+%%%%%%%%%%%%%%%%%%%%%%% PART 1
+\vspace{-0.5cm}
+\subsection*{Part 1: Plotting y(t) and verifying partial fractions}
+\setlength{\parindent}{5ex}
+Fist we plot the y(t) that we calculated before lab from 0<t<2 s. This involved defining a unit function in order to create a y(t) function. The resulting graph is seen below. See appendix for the code used.\par
+
+We then plotted y(t) again by using the scipy.signal.step() command and our previously defined H(s). 
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=8cm]{task_1.png}
+    \caption{Plot using both methods for y(t)}
+    \label{fig:ghj}
+\end{figure}
+
+\newpage
+As you can see, both graphs are identical. This shows that given H(s) the signal.step() command is capable of completing our hand calculations. With this in mind, we also verified our work for the partial fraction expansion using scipy.signal.residue() as seen below.
+
+\begin{lstlisting}[language=Python, caption=Python partial fraction expansion]
+#Python partial fraction expantion 
+num = [1,6,12]
+den = [1,10,24, 0]
+[R,P,_]=sig.residue( num, den )
+
+print('R1: ', R, '\nP1: ', P)
+\end{lstlisting}
+\vspace{.5cm}
+This resulted in the following zeros and poles: \par
+R1:  [ 1.  -0.5  0.5] \par
+P1:  [-6. -4.  0.]\par
+\vspace{.5cm}
+Notice that our R1 values match the numerators of our partial fraction expansion, while P1 values equal the value of needed for s in order to get a denominator of zero. \par
+\vspace{.5cm}
+This proves that 
+$$(4s+12)/(s∗(s+4)∗(s+6))$$
+$$= (A/s)+(B/(s+4))+(C/(s+6))$$
+$$= (.5/s)+(-.5/(s+4))+(1/(s+6)$$
+%%%%%%%%%%%%%%%%%%%%%%% PART 2
+
+\vspace{-0.5cm}
+\subsection*{Part 2: Solving more complex partial fractions}
+\setlength{\parindent}{5ex}
+
+Next, we tested scipy.signal.residue() to solve a partial fraction on a function that is harder to solve by hand.\par
+\vspace{.5cm}
+The system is as follows:
+$$y^{(5)}(t) + 18y^{(4)}(t) + 218y^{(3)}(t) + 2036y^{(2)}(t) + 9085y^{(1)}(t) + 25250y(t) = 25250x(t)$$
+
+We started by redefining our numerator and denominator before running the scipy.signal.residue() function as seen below. 
+
+\begin{lstlisting}[language=Python, caption=Python partial fraction expansion]
+#Python zeros and poles
+den = [1, 18, 218, 2036, 9085, 25250, 0]
+num = [25250]
+[R,P,_]=sig.residue( num, den )
+print('R2: ',R, '\nP2: ',P)
+\end{lstlisting}
+\vspace{1cm}
+This resulted in the following zeros and poles: \par
+R2:  \par
+[  1.+0.j              -0.48557692+0.72836538j     -0.48557692-0.72836538j \par -0.21461963+0.j     0.09288674-0.04765193j      0.09288674+0.04765193j] \par
+        \vspace{.5cm}
+P2:  [  0. +0.j     -3. +4.j    -3. -4.j     -10. +0.j      -1.+10.j    -1.-10.j]\par
+
+\vspace{.5cm}
+Knowing these values, we were able to apply them to the cosine method and solve for y(t). Please see equations for details on this method. Also, note that k values come from R2, while the alpha and omega values come from P2. 
+
+\begin{lstlisting}[language=Python, caption= Cosine method for y(t)]
+#Cosine method 
+t = np.arange(0,4.5+steps,steps)
+y = np.zeros(t.shape)
+for i in range (len(R)):  
+    k = abs(R[i])
+    a = np.real(P[i])
+    w = np.imag(P[i])
+    ang = np.angle(R[i])
+    
+    y = y + (k*np.exp(a*t)*np.cos((w*t)+ang))*u(t)
+\end{lstlisting}\newpage
+
+Next, we used scipy.signal.step() to verify our results. 
+
+\begin{lstlisting}[language=Python, caption= scipy.signal.step() for y(t)]
+den = [1, 18, 218, 2036, 9085, 25250]
+num = [25250]
+tout , yout = sig.step(( num , den ) , T = t )
+\end{lstlisting}
+\vspace{.5cm}
+Both functions are plotted below. 
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=9cm]{task_2.png}
+    \caption{Plots for y(t)}
+    \label{fig:ghj}
+\end{figure}
+
+Since the plots are identical, we are certain that both methods are accurate options for solving for y(t). 
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Equations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Equations}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+
+    \textbf{Differential equation problem:}
+
+
+$$y^{''}(t) + 10y^{'}(t) + 24y(t) = x^{''}(t) + 6x^{'}(t) + 12x(t)$$
+
+\begin{center}
+    \textbf{Laplace functions used}
+\end{center}
+
+$$dy(t)/dt=sY(s)−Y(0{^−})$$
+$$d{^2}y(t)/dt{^2}=s^{2}Y(s)−sY (0{^−})−Y{^'}(0{^−})$$
+
+$$s{^2}Y(s)+10sY(s)+24Y(s)=s{^2}X(s)+6sX(s)+12X(s)$$
+$$Y(s)[s{^2}+10s+24]=X(s)[s{^2}+6s+12]$$
+$$H(s)=Y(s)/X(s)=(s{^2}+6s+12)/(s{^2}+10s+24)$$
+$$H(s)=1−(4s+12)/(s{^2}+10s+24)$$
+
+\begin{center}
+    \textbf{Using partial fraction expansion}
+\end{center}
+
+$$Y(s)=X(s)(1−(4s+12)/(s{^2}+10s+24))$$
+
+$$=(1/s)−(4s+12)/(s∗(s+4)∗(s+6))$$
+
+$$=(1/s)+(A/s)+(B/(s+4))+(C/(s+6))$$
+
+$$A = -.5, B = -.5, C = -1$$
+
+
+$$y(t) = (.5-.5e^{-4t}+e^{-6t})u(t)
+$$
+\vspace{.5cm}
+\begin{center}
+    \textbf{Cosine method}
+\end{center}
+$$y(t) = (|k|*e^{a*t}*cos((w*t)+k(ang))*u(t)$$
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Conclusion %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section*{Conclusion}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+ There are spicy functions in python that allow us to double check and complete transfer function calculations. In particular, we are able to solve partial fraction expansions for H(s) with spicy.sig.residue(). We also use spicy.sig.step() to solve for y(t) given H(s). Lastly, we also learned that y(t) can be solved using the cosine method and the values acquired from spicy.sig.residue(). 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Questions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Questions}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+\textbf{For a non-complex pole-residue term, you can still use the cosine method, explain why this
+works.}\par
+\vspace{.5cm}
+
+If there were no imaginary elements in R2 of this lab, then omega in the cosine method would be zero. This would make the cosine term go from $cos((w*t)+k(ang))$ to $cos(0)$. Since this equals 1, the rest of the cosine method equation is unaffected, leaving $y(t) = |k|*e^{a*t}*1$ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section*{Appendix}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{lstlisting}[language=Python, caption= Lab 6 code]
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+This is a temporary script file.
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.signal as sig
+import control
+import pandas
+
+#Part 1: Plot y(t)
+steps = 1e-3
+t = np.arange(0,2+steps,steps)
+
+#Hand calculation 
+
+#Defined unit function
+def u(t):
+    y = np.zeros(t.shape)
+    for i in range (len(t)):
+        if t[i] >= 0:
+            y[i]=1
+                
+        else:
+            y[i]=0
+            
+    return y 
+    
+    
+#Defined y(t) functions   
+y = (1/2+np.exp(-6*t)-(1/2)*np.exp(-4*t))*u(t)
+    
+#Python calculation
+num = [1,6,12]
+den = [1,10,24]
+tout , yout = sig.step(( num , den ) , T = t )
+
+
+#Graph for hand calc h(t) 
+myFigSize = (10,8)
+plt.figure(figsize=myFigSize)
+plt.subplot(1,2,1)
+plt.plot(t,y)
+plt.grid(True)
+plt.xlabel('time')
+plt.ylabel('y(t)')
+plt.title('Hand calculated y(t)')
+
+#Graph for python h(t) 
+plt.subplot(1,2,2)
+plt.plot(tout,yout)
+plt.grid(True)
+plt.xlabel('time')
+plt.ylabel('y(t)')
+plt.title('Python calculated y(t)')
+plt.show()
+
+#Python partial fraction expantion 
+num = [1,6,12]
+den = [1,10,24, 0]
+[R,P,_]=sig.residue( num, den )
+
+print('R1: ', R, '\nP1: ', P)
+
+
+#Part 2:  Find zeros and poles
+
+#Python zeros and poles
+den = [1, 18, 218, 2036, 9085, 25250, 0]
+num = [25250]
+[R,P,_]=sig.residue( num, den )
+
+print('R2: ',R, '\nP2: ',P)
+
+#Cosine method 
+t = np.arange(0,4.5+steps,steps)
+y = np.zeros(t.shape)
+
+for i in range (len(R)):  
+    k = abs(R[i])
+    a = np.real(P[i])
+    w = np.imag(P[i])
+    ang = np.angle(R[i])
+    
+    y = y + (k*np.exp(a*t)*np.cos((w*t)+ang))*u(t)
+
+ 
+
+#sig.step method
+den = [1, 18, 218, 2036, 9085, 25250]
+num = [25250]
+tout , yout = sig.step(( num , den ) , T = t )
+
+
+
+#Graphed cosine method
+plt.figure(figsize=myFigSize)
+plt.subplot(1,2,1)
+plt.plot(t,y)
+plt.grid(True)
+plt.xlabel('time')
+plt.ylabel('y(t)')
+plt.title('Cosine method')
+
+#Graphed h(t)*u(t)
+
+plt.subplot(1,2,2)
+plt.plot(tout,yout)
+plt.grid(True)
+plt.xlabel('time')
+plt.ylabel('h(t)*u(t)')
+plt.title('Using sig.step')
+#plt.show()
+
+\end{lstlisting}
+
+\end{document}
