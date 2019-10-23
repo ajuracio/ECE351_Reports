@@ -1,0 +1,339 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Adriana Oliveira
+%ECE 351-51
+%Lab: 7
+%Due date: 10/22/2019
+%notes: 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, subcaption, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+
+
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{indentfirst}
+\usepackage{listings}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{Adriana Oliveira}
+\fancyhead[R]{ECE351}
+\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+\title{ 
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{ECE351-51: Lab 7}} 
+		\HRule{2pt} \\ [0.5cm]
+		\normalsize\textsc{October 22, 2019} \vspace*{5\baselineskip}}
+
+\date{}
+\author{\normalsize
+		Submitted By: \\
+		\normalsize Adriana Oliveira\\}
+
+\maketitle
+
+\newpage
+
+\sectionfont{\scshape}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Introduction %%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Methodology%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Methodology}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+
+%%%%%%%%%%%%%%%%%%%%%%% PART 1
+\vspace{-0.5cm}
+\subsection*{Part 1: Analyzing a block diagram with an open loop system}
+\setlength{\parindent}{5ex}
+Given the following block diagram, we came up with two methods of analysis. First we would examine the open loop by hand and then using python functions. An open loop is the shortest path from the input to the output. \par
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=8cm]{block.png}
+    \caption{Block Diagram}
+    \label{fig:ghj}
+\end{figure}
+
+We are also given A(s), G(s), and B(s).
+
+$$G(s) = (s + 9)/ (s{^2}-6s-16)*(s + 4) $$
+\vspace{-.5cm}
+$$A(s) =( s + 4)/( s{^2} + 4*s + 3)$$
+\vspace{-.5cm}
+and $$B(s) = s{^2} + 26*s + 168$$
+
+Our first step was to write these functions in factored form using poles and zeros. Next we assigned the numerator and denominator of each function to a variable. These numerator and denominator variables were entered into the scipy.signal.tf2zpk() function were their zeros and poles were found and verified.  
+
+\begin{lstlisting}[language=Python, caption= Factored form]
+#G(s)
+numG = [1,9]
+denG = [1,-2,-40,-64]
+[R,P,K] = sig.tf2zpk( numG, denG)
+print('R1: ', R, '\nP1: ', P, '\nK1: ', K)
+
+#A(s)
+numA = [1,4]
+denA = [1,4,3]
+[R,P,K] = sig.tf2zpk( numA, denA)
+print('R2: ', R, '\nP2: ', P, '\nK2: ', K)
+
+#B(s)
+numB = [1,26,168]
+denB = [1]
+[R,P,K] = sig.tf2zpk( numB, denB)
+print('R3: ', R, '\nP3: ', P, '\nK3: ', K)
+\end{lstlisting}
+\vspace{.5cm}
+
+This resulted in the following zeros and poles:
+\vspace{.5 cm}
+
+R1:  [-9.],         P1:  [ 8. -4. -2.],     K1:  1.0\par
+R2:  [-4.],         P2:  [-3. -1.],         K2:  1.0\par
+R3:  [-14. -12.],   P3:  [],                K3:  1.0\par
+\vspace{.5cm}
+With our handwritten calculations verified, we were able to use A(s) and B(s) in our open loop function below.
+
+$$H(s) = x(t)/y(t) = A(s)*B(s)$$
+
+We assigned a numerator and denominator value to H(s) using the convolve function. These values were then entered into our scipy.signal.tf2zpk() function to produce the following poles and zeros.
+
+R\_OPEN:  [-9. -4.] \par
+P\_OPEN:  [ 8. -4. -3. -2. -1.] \par
+K\_OPEN:  1.0\par
+\vspace{.5cm}
+As a result, our open loop system is as follows:
+
+$$H(s) = (s+9)*(s-4) / ((s-8)*(s+4)*(s+3)*(s+2)*(s+1))$$
+
+%\begin{lstlisting}[language=Python, caption=]
+
+%\end{lstlisting}
+%\vspace{.5cm}
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%% PART 2
+
+\vspace{-0.5cm}
+\subsection*{Part 2: Analyzing a block diagram with a closed loop system}
+\setlength{\parindent}{5ex}
+Next we solved for H(s) with a closed loop system. This involved manipulating the G(s) and B(s) blocks in the negative feedback and multiplying them with the A(s) block in series. This resulted in the function below. 
+
+$$H(s) = (G(s)/1+B(s))*A(s)$$
+$$ =  (numA*numB) / ((denG + (numB*numG))*denA)$$
+
+The numerator and denominator for H(s) were calculated using the convolve function. These variables were then used in the scipy.signal.tf2zpk() function to calculate the poles and zeros. \par
+\vspace{.5 cm}
+This resulted in the following transfer function:
+\vspace{-.5 cm}
+$$=  (s+9)*(s+4)/((s+5.16-9.52j)*(s+5.16+9.52j)*(s+6.18)*(s+3)*(s+1))$$
+
+%\begin{lstlisting}[language=Python, caption=]
+
+%\end{lstlisting}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Results}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+We found the transfer function using an open loop and closed loop system. After finding the poles and zeros for both, we graphed each response. 
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=10cm]{response.png}
+    \caption{Transfer functions}
+    \label{fig:ghj}
+\end{figure}
+
+The open loop system continues exponentially and is considered unstable. This is due to one of our zero value numbers being positive. The closed loop system starts to taper off. Its data is stable because it is predictable and usable. It also did not contain any positive zero values. 
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Equations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Equations}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{center}
+    \textbf{Factored form:}
+\end{center}
+$$G(s) =  (s+9)/(8*s^{2} - 4*s -2)$$
+\vspace{-.5cm}
+$$A(s) = -4/ (-3*s -1)$$
+\vspace{-.5cm}
+$$B(s) = -14*s -12 $$
+
+\begin{center}
+    \textbf{Open Loop:}
+\end{center}
+$$H(s)= x(t)/ y(t) =  A(s) * B(s)$$
+\vspace{-.5cm}
+$$= (numA*numB)/ (demA*demB)$$
+\vspace{-.5cm}
+$$= (s+9)*(s-4) / ((s-8)*(s+4)*(s+3)*(s+2)*(s+1))$$
+
+\begin{center}
+    \textbf{Closed Loop:}
+\end{center}
+$$H(s) = x(t)/ y(t) =  (G(s)/1+B(s))*A(s)$$
+$$ =  (numA*numB) / ((denG + (numB*numG))*denA)$$
+$$=  (s+9)*(s+4)/((s+5.16-9.52j)*(s+5.16+9.52j)*(s+6.18)*(s+3)*(s+1))$$
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Questions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section*{Questions}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+\textbf{In Part 1 Task 5, why does convolving the factored terms using scipy.signal.convolve() result in the expanded form of the numerator and denominator? Would this work with your user-defined convolution function from Lab 3? Why or why not?}\par
+\vspace{.5cm}
+Convolving multiplies two functions through resulting in the expanded form of their multiplication. Although the spicy convolve function is structured differently, it produces the same multiplication expansion as our user defined convolution function. 
+\vspace{.5cm}
+
+\textbf{Discuss the difference between the open- and closed-loop systems from Part 1 and Part 2. How does stability differ for each case, and why?}
+\vspace{.5cm}
+
+Zeros in the denominator of a transfer function determine if it is stable or unstable. If positive, the function will grow exponentially and act in an unstable manner.\par
+\vspace{.5cm}
+
+\textbf{What is the difference between scipy.signal.residue() used in Lab 6 and scipy.signal.tf2zpk() used in this lab?}
+\vspace{.5cm}
+
+scipy.signal.residue() computes the partial fraction expansion by returning residues and poles. scipy.signal.tf2zpk() factors by isolating poles and zeros. 
+\vspace{.5cm}
+
+\textbf{Is it possible for an open-loop system to be stable? What about for a closed-loop system to
+be unstable? Explain how or how not for each.}
+\vspace{.5cm}
+
+It is possible for both to be stable or unstable. The determining factor is if the poles that go in the denominator are positive. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section*{Appendix}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{lstlisting}[language=Python, caption= Lab 7 code]
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Oct 15 19:36:40 2019
+
+@author: ajoli
+"""
+
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+This is a temporary script file.
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.signal as sig
+import control
+import pandas
+
+#Part 1: Block diagram analysis - open loop
+    #1:G(s), A(s), and B(s) in factored form
+
+    #G(s)
+numG = [1,9]
+denG = [1,-2,-40,-64]
+[R,P,K] = sig.tf2zpk( numG, denG)
+print('R1: ', R, '\nP1: ', P, '\nK1: ', K)
+
+    #A(s)
+numA = [1,4]
+denA = [1,4,3]
+[R,P,K] = sig.tf2zpk( numA, denA)
+print('R2: ', R, '\nP2: ', P, '\nK2: ', K)
+
+    #B(s)
+numB = [1,26,168]
+denB = [1]
+[R,P,K] = sig.tf2zpk( numB, denB)
+print('R3: ', R, '\nP3: ', P, '\nK3: ', K)
+
+    #2: scipy.signal.tf2zpk() function to check your results
+    #open loop
+    
+num = sig.convolve(numA, numG)
+den = sig.convolve(denA, denG)
+[R,P,K] = sig.tf2zpk( num, den)
+print('Rtotal: ', R, '\nPtotal: ', P, '\nKtotal: ', K)
+
+    #5:Plot the step response of the open-loop transfer function.
+     #Graph for python h(t) 
+steps = 1e-3
+t = np.arange(0,4.5+steps,steps)   
+tout , yout = sig.step(( num , den ) , T = t )
+ 
+myFigSize = (15,10)
+plt.subplot(1,2,1)
+plt.plot(tout,yout)
+plt.grid(True)
+plt.xlabel('time')
+plt.ylabel('y(t)')
+plt.title('Open loop y(t)')
+ 
+
+    #6:Does your result from Task 5 support your answer from Task 4?
+    
+#Part 2: Block diagram analysis - closed loop
+    
+numCL = [sig.convolve(numA, numG)]
+denCL = sig.convolve((denG + sig.convolve(numB, numG)), denA)
+[R,P,K] = sig.tf2zpk( numCL, denCL)
+print('RCL: ', R, '\nPCL: ', P, '\nKCL: ', K)
+
+tout , yout = sig.step(( numCL , denCL ) , T = t )
+
+plt.subplot(1,2,2)
+plt.plot(tout,yout)
+plt.grid(True)
+plt.xlabel('time')
+plt.ylabel('y(t)')
+plt.title('Closed loop y(t)')
+plt.show()
+
+\end{lstlisting}
+
+\end{document}
