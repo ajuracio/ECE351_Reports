@@ -1,0 +1,244 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Adriana Oliveira
+%ECE 351-51
+%Lab: 9
+%Due date: 11/05/2019
+%notes: 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, subcaption, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+
+
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{indentfirst}
+\usepackage{listings}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{Adriana Oliveira}
+\fancyhead[R]{ECE351}
+\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+\title{ 
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{ECE351-51: Lab 9}} 
+		\HRule{2pt} \\ [0.5cm]
+		\normalsize\textsc{Novermber 5, 2019} \vspace*{5\baselineskip}}
+
+\date{}
+\author{\normalsize
+		Submitted By: \\
+		\normalsize Adriana Oliveira\\}
+
+\maketitle
+
+\newpage
+
+\sectionfont{\scshape}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Introduction %%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+This lab visually explores Fourier series by graphing the magnitude and phase angles of basic transform functions. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Methodology%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Methodology}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+
+%%%%%%%%%%%%%%%%%%%%%%% PART 1
+\vspace{-0.5cm}
+\subsection*{Part 1}
+\setlength{\parindent}{5ex}
+We began by creating a fast Fourier transform function. This computes the frequency, magnitude, and phase angle of a function given fs. Fs is used to calculate our sample frequency. For our purpose, we set it to 100. This function also shifts the function to account for where the zero frequency occurs. 
+\begin{lstlisting}[language=Python, caption= Fast Fourier transform]
+def fft(x,fs):
+    
+    N = len( x ) # find the length of the signal
+    X_fft = scipy.fftpack.fft ( x ) # perform the fast Fourier transform (fft)
+    X_fft_shifted = scipy.fftpack.fftshift ( X_fft )    
+    # shift zero frequency components
+    # to the center of the spectrum
+
+    freq = np.arange ( - N /2 , N /2) * fs / N        
+    # compute the frequencies for the output
+    # signal , (fs is the sampling frequency and
+    # needs to be defined previously in your code
+    
+    X_mag = np.abs( X_fft_shifted ) / N # compute the magnitudes of the signal
+    X_phi = np.angle ( X_fft_shifted ) # compute the phases of the signal
+
+    return (freq, X_mag, X_phi)
+\end{lstlisting}
+\newpage
+
+We graphed the transfer magnitude and phase to the frequency, as well as the original shape of the following from t=0 to t=20s: $cos(2\pit)$, $ 5sin(2\pit)$, and .$ 2cos((2\pi 2t) − 2) + sin2((2\pi 6t) + 3)$. The magnitude and phase were graphed again at a more zoomed in frequency. Five subplots were produced for each function and can be seen in results.
+
+Next, we repeated this process with a clean fft function. This involved eliminating the phase results from magnitudes that were insignificant. 
+  
+\begin{lstlisting}[language=Python, caption= $b_k$ values]
+def clean_fft(x,fs):
+    
+    N = len( x ) # find the length of the signal
+    X_fft = scipy.fftpack.fft ( x ) # perform the fast Fourier transform (fft)
+    X_fft_shifted = scipy.fftpack.fftshift ( X_fft )    
+    # shift zero frequency components
+    # to the center of the spectrum
+
+    freq = np.arange ( - N /2 , N /2) * fs / N        
+    # compute the frequencies for the output
+    # signal , (fs is the sampling frequency and
+    # needs to be defined previously in your code
+    
+    X_mag = np.abs( X_fft_shifted ) / N # compute the magnitudes of the signal
+    X_phi = np.angle ( X_fft_shifted ) # compute the phases of the signal
+    for i in range(len(X_mag)): # Remove unnecessary phases 
+        if np.abs(X_mag[i]) < 1e-10:
+            X_phi[i] = 0
+    return (freq, X_mag, X_phi)
+\end{lstlisting}
+Lastly, we used our clean fft to similarly graph the transform magnitude and phase of the square wave from lab 8. 
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Results}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\vspace{2cm}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=16cm]{task1.png}
+    \caption{Task 1: $x = cos(2\pi t)$}
+    \label{fig:ghj}
+\end{figure}
+\newpage
+.
+\vspace{3cm}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=16cm]{task2.png}
+    \caption{Task 2: $x = 5sin(2\pi t)$}
+    \label{fig:ghj}
+\end{figure}
+\newpage
+.
+\vspace{3cm}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=16cm]{task3.png}
+    \caption{Task 3: $x = 2cos((4\pi t)-2)+sin((12\pi t)+3)^{2}$}
+    \label{fig:ghj}
+\end{figure}
+\newpage
+
+.
+\vspace{3cm}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=16cm]{task4_1.png}
+    \caption{Task 4.1: $x = cos(2\pi t)$ }
+    \label{fig:ghj}
+\end{figure}
+\newpage
+
+.
+\vspace{3cm}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=16cm]{task4_2.png}
+    \caption{Task 4.2: $x = 5sin(2\pi t)$ }
+    \label{fig:ghj}
+\end{figure}
+\newpage
+
+.
+\vspace{3cm}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=16cm]{task4_3.png}
+    \caption{Task 4.3: $x = 2cos((4\pi t)-2)+sin((12\pi t)+3)^{2}$ }
+    \label{fig:ghj}
+\end{figure}
+\newpage
+
+.
+\vspace{3cm}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=16cm]{task5.png}
+    \caption{Task 4.4: $x=b_{k}sin((k2\pi t)/T)$ }
+    \label{fig:ghj}
+\end{figure}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Equations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Equations}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{center}
+    \textbf{Fourier transforms}
+\end{center}
+$$Fourier({cos (2\pi f_{0}t)}) = \frac{1}{2} [\delta (f − f_{0}) + \delta (f + f_{0})]$$
+
+$$Fourier({sin (2\pi f_{0}t)}) = \frac{1}{2i} [\delta (f − f_{0}) - \delta (f + f_{0})]$$
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Questions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section*{Questions}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+\textbf{What happens if fs is lower? If it is higher? fs in your report must span a few orders of magnitude.}\par
+\vspace{.5cm}
+
+Fs is our sample frequency and controls our step size. If it is lower, we will have a smaller step size. The opposite is true if fs is increased. The step size determines how often a sample occurs. For our lab, we have a step size of .01, which means that in our time scale (0-20 s) a sample will be taken every 10 ms. Fs is also used to solve for frequency in our fft function as seen in the line below. As fs increases, the output frequency increases.\par
+$$freq = np.arange ( - N /2 , N /2) * fs / N  $$
+
+\textbf{What difference does eliminating the small phase magnitudes make?}
+
+\vspace{.5cm}
+In "cleaning" our fft function, we only looked at phase angles corresponding to transform magnitudes greater than 1e-10. This reduced noise in the phase angle chart caused by samples of insignificant magnitude values. \par
+
+\vspace{.5cm}
+
+\textbf{Verify your results from Tasks 1 and 2 using the Fourier transforms of cosine and sine.
+Explain why your results are correct. You will need the transforms in terms of Hz, not rad/s.}
+
+The Fourier equation for cosine expresses one period where two positive delta functions are spaced equidistantly from zero with a magnitude of .5. This perfectly describes the zoomed in magnitude graph for our cosine function and therefore validates our task 1 graph.
+
+Sine also expresses one period where two delta functions are spaced equidistantly from zero. This matches the delta functions in the zoomed in magnitude portion of task 2. What differentiates the sine function is that the angles corresponding to the delta functions are equal and opposite. This is what produces the sine shape seen in our graph for task two. 
+
+
+
+\end{document}
