@@ -1,0 +1,367 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Adriana Oliveira
+%ECE 351-51
+%Lab: 10
+%Due date: 11/12/2019
+%notes: 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, subcaption, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+
+
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{indentfirst}
+\usepackage{listings}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{Adriana Oliveira}
+\fancyhead[R]{ECE351}
+\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+\title{ 
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{ECE351-51: Lab 10}} 
+		\HRule{2pt} \\ [0.5cm]
+		\normalsize\textsc{November 12, 2019} \vspace*{5\baselineskip}}
+
+\date{}
+\author{\normalsize
+		Submitted By: \\
+		\normalsize Adriana Oliveira\\}
+
+\maketitle
+
+\newpage
+
+\sectionfont{\scshape}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Introduction %%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+In this lab, we run a signal through an RLC circuit with a given transfer function to find its output signal. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Methodology%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Methodology}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+\sectionfont{\scshape}
+
+We were given an RLC circuit and its resulting transfer function below. By hand, we used this to solve for the magnitude and phase of H(jW). Please see equations for details.  \par
+
+\vspace{1.5cm}
+\begin{figure}[htp]
+     \centering
+     \includegraphics[width=8cm]{pre_lab_circuit.png}
+     \caption{RLC circuit}
+     \label{fig:my_label}
+ \end{figure}
+\vspace{1cm}
+$$H(s) = \frac {\frac{s}{RC}} {s^{2} + \frac {s}{RC} + \frac{1}{LC}} $$
+
+%%%%%%%%%%%%%%%%%%%%%%% PART 1
+\vspace{-0.5cm}
+\subsection*{Part 1}
+\setlength{\parindent}{5ex}
+Once we found the phase and magnitude, we created bode plots from $w = 103$ rad/s to $w = 106$ rad/s. This was achieved using a step size of 100. We also used matplotlib.pyplot.plot() to get the x-axis on a logarithmic scale. \par
+
+\begin{lstlisting}[language= Python, caption = Hand calculated magnitude and phase]
+mag_H = (w/(R*C)) / np.sqrt(( ((1/(L*C)) - (w**2) )**2) + (w/(R*C))**2)
+db_mag_H = 20*np.log10(mag_H)
+
+phase_H = ((.5*np.pi) - np.arctan( (w/(R*C)) / ((1/(L*C)) - (w**2)))) 
+
+for i in range(len(w)):
+    if ( ( (1/(L*C)) - w[i]**2 ) < 0 ):
+        phase_H[i] -= np.pi
+\end{lstlisting}
+
+\vspace{1cm}
+We converted our magnitude into decibels as that is typical of bode plots. Also notice that we took the phase minus $\pi$ or 180 degrees when $\frac{1}{LC} - w^{2}$ was less then zero. This was to avoid finding the negative version of our desired angle when taking the inverse tangent for our phase. 
+
+Next we verified our hand calculations by creating bode plots using scipy.signal.bode. 
+
+\begin{lstlisting}[language= Python, caption = Magnitude and phase using sig.bode]
+num = [(1/(R*C)), 0]
+den = [1, (1/(R*C)), (1/(L*C))]
+(freq, mag, phase) = sig.bode((num, den))
+\end{lstlisting}
+\vspace{1cm}
+Lastly, we plotted the bode frequency response in Hz instead of rad/s using the code below. 
+
+\begin{lstlisting}[language= Python, caption = Frequency response in Hz]
+sys = con.TransferFunction(num, den)
+_= con.bode(sys, w, Hz=True, dB=True, deg=True, Plot=True)
+#  _ = ... to suppress the output
+\end{lstlisting}
+\vspace{1cm}
+%%%%%%%%%%%%%%%%%%%%%%% PART 2
+\vspace{-0.5cm}
+\subsection*{Part 2}
+\setlength{\parindent}{5ex}
+After becoming familiar with the bode plots of our transfer function, we plotted the following signal from t = 0s to t = 0.01s with a step size of 1/fs, with fs being $1*10^{6}$. We chose a large sample frequency to get better resolution in our plots. 
+
+$$x(t) = cos(2\pi100t) + cos(2\pi3024t) + sin(2\pi50000t)$$
+
+Next, we put this function through our RLC filter and plotted the output.
+
+\begin{lstlisting}[language= Python, caption = Input and output signal code]
+fs = 1e6
+steps = 1/fs
+t = np.arange (0, 10e-3 +steps, steps)
+x = np.cos(2*np.pi*100*t) + np.cos(2*np.pi*3024*t) + np.sin(2*np.pi*50000*t)
+
+# z-domain equivalent of x
+numX, denX = sig.bilinear(num, den, fs)
+#Pass through filter
+y = sig.lfilter(numX, denX, x)
+\end{lstlisting}
+
+\vspace{1cm}
+Notice that to use sig.lfilter we had to first find the z-domain equivalent of our input signal. \par
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Results}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{figure}[htp]
+     \centering
+     \includegraphics[width=8cm]{part1_1.png}
+     \caption{Bode plots from hand calculation}
+     \label{fig:my_label}
+ \end{figure}
+\vspace{1cm}
+\begin{figure}[htp]
+     \centering
+     \includegraphics[width=8cm]{part1_2.png}
+     \caption{Bode plots from sig.bode}
+     \label{fig:my_label}
+ \end{figure}
+\vspace{1cm}
+
+\begin{figure}[htp]
+     \centering
+     \includegraphics[width=8cm]{part1_3.png}
+     \caption{frequency response in Hz}
+     \label{fig:my_label}
+ \end{figure}
+\vspace{1cm}
+
+\begin{figure}[htp]
+     \centering
+     \includegraphics[width=8cm]{Part2_1.png}
+     \caption{Input signal}
+     \label{fig:my_label}
+ \end{figure}
+\vspace{1cm}
+
+\begin{figure}[htp]
+     \centering
+     \includegraphics[width=8cm]{part2_2.png}
+     \caption{Output signal}
+     \label{fig:my_label}
+ \end{figure}
+\vspace{1cm}
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Equations%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Equations}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{center}
+    \textbf{We used the given transfer function to solve for the magnitude and phase of $H(jw)$ }
+\end{center} 
+$$H(s) = \frac {\frac{s}{RC}} {s^{2} + \frac {s}{RC} + \frac{1}{LC}} $$
+ 
+ \vspace{.5cm}
+ 
+ $$|H(jw)|= \frac {\frac{w}{RC}} { \sqrt{(\frac{1}{LC}-w^{2})^{2}+(\frac{w}{RC}})^2 } $$
+ 
+ \vspace{.5cm}
+ 
+$$\phase{H(jW)} = 90^{\circ} - tan^{-1}(\frac{\frac{w}{RC}}{\frac{1}{LC}-w^2})$$
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Questions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Questions}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+\textbf{Explain how the filter and filtered output in Part 2 makes sense given the Bode plots from Part 1. Discuss how the filter modifies specific frequency bands, in Hz.}\par
+
+\vspace{.5cm}
+In part one, our bode plots conveyed that the filter we were using was a bandpass filter. This means that it only accepts frequencies of a certain range and rejects all others. When we look at the output, we see that it has a uniform frequency with a fairly consistent amplitude. 
+\vspace{.5cm}
+
+\textbf{Discuss the purpose and workings of scipy.signal.bilinear() and scipy.signal.lfilter().}\par
+
+\vspace{.5cm}
+sig.bilinear converts functions in the s-plane to the digital z-plane. We used it to find the z-plane values for the numerator and denominator of x(t). Once in this form, we were able to use sig.lfilter() to run our new numerator and denominator through an electronic filter.\par 
+\vspace{.5cm}
+
+\textbf{What happens if you use a different sampling frequency in scipy.signal.bilinear() than you used for the time-domain signal?
+}\par
+
+\vspace{.5cm}
+When I decreased my sample frequency for sig.bilinear() from $1*10^{6}$ to $1*10^{3}$ my output was more compact as seen below.
+
+\begin{figure}[htp]
+     \centering
+     \includegraphics[width=8cm]{smaller.png}
+     \caption{Output signal with fs = $1*10^{3}$}
+     \label{fig:my_label}
+ \end{figure}
+\vspace{1cm}
+
+When I increased the frequency to $1*10^{9}$ my output signal formed a rough sine wave. 
+
+\begin{figure}[htp]
+     \centering
+     \includegraphics[width=8cm]{larger.png}
+     \caption{Output signal with fs = $1*10^{9}$}
+     \label{fig:my_label}
+ \end{figure}
+\vspace{1cm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section*{Appendix}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{lstlisting}[language=Python, caption= Lab 9 code]
+#%%
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.signal as sig
+import scipy
+import control
+import pandas
+import control as con
+
+#Task 1
+steps = 100
+w = np.arange(1e3,1e6,steps)
+R = 1e3
+L = 27e-3
+C = 100e-9
+
+mag_H = (w/(R*C)) / np.sqrt(( ((1/(L*C)) - (w**2) )**2) + (w/(R*C))**2)
+db_mag_H = 20*np.log10(mag_H)
+
+phase_H = ((.5*np.pi) - np.arctan( (w/(R*C)) / ((1/(L*C)) - (w**2)))) 
+
+for i in range(len(w)):
+    if ( ( (1/(L*C)) - w[i]**2 ) < 0 ):
+        phase_H[i] -= np.pi
+
+################## Bode for Hand Calculations ##################
+myFigSize = (12,8)
+plt.figure(figsize=myFigSize)
+plt.subplot(1,2,1)
+plt.semilogx(w,db_mag_H)
+plt.grid(True)
+plt.xlabel('w(rad/s)')
+plt.ylabel('|H(jw)|(db)')
+plt.title('Hand Calculated Magnitude of H(jw)')
+
+plt.subplot(1,2,2)
+plt.semilogx(w,phase_H)
+plt.grid(True)
+plt.xlabel('w (rad/s)')
+plt.ylabel('phase angle (rad)')
+plt.title('Hand Calculated Phase of H(jw)')
+plt.show()
+#%%
+################## Bode using sig.bode ##################
+num = [(1/(R*C)), 0]
+den = [1, (1/(R*C)), (1/(L*C))]
+
+(freq, mag, phase) = sig.bode((num, den))
+
+myFigSize = (12,8)
+plt.figure(figsize=myFigSize)
+plt.subplot(1,2,1)
+plt.semilogx(freq, mag)
+plt.grid(True)
+plt.xlabel('w(rad/s)')
+plt.ylabel('|H(jw)|(db)')
+plt.title('Magnitude of H(jw) with sig.bode')
+
+plt.subplot(1,2,2)
+plt.semilogx(freq, phase)
+plt.grid(True)
+plt.xlabel('w (rad/s)')
+plt.ylabel('phase angle (rad)')
+plt.title('Phase of H(jw) with sig.bode')
+plt.show()
+
+#%%
+################### Frequency plots in Hz###################
+sys = con.TransferFunction(num, den)
+_= con.bode(sys, w, Hz=True, dB=True, deg=True, Plot=True)
+#  _ = ... to suppress the output
+
+#%%
+#Task 2
+################### Plot a Signal ########################
+fs = 1e6
+steps = 1/fs
+t = np.arange (0, 10e-3 +steps, steps)
+x = np.cos(2*np.pi*100*t) + np.cos(2*np.pi*3024*t) + np.sin(2*np.pi*50000*t)
+
+myFigSize = (12,8)
+plt.figure(figsize=myFigSize)
+plt.subplot(1,1,1)
+plt.plot(t, x)
+plt.grid(True)
+plt.xlabel('t(s)')
+plt.ylabel('x(t)')
+plt.title('Signal x(t)')
+
+#%%
+################### Pass through RLC circuit ################
+
+#s z-domain equivalent of x
+numX, denX = sig.bilinear(num, den, fs)
+#Pass through filter
+y = sig.lfilter(numX, denX, x)
+
+plt.figure(figsize=myFigSize)
+plt.plot(t, y)
+plt.grid(True)
+plt.title('Signal through RLC Filter')
+plt.xlabel('t(s)')
+plt.ylabel('y(t)')
+#%%
+\end{lstlisting}
+
+\end{document}
