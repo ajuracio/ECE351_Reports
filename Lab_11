@@ -1,0 +1,358 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Adriana Oliveira
+%ECE 351-51
+%Lab: 11
+%Due date: 11/19/2019
+%notes:  z- domain
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, subcaption, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+
+
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{indentfirst}
+
+
+%coding libraries 
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegrey}{rbg}{0.5,0.5,0.5}
+\definecolor{codeblue}{rgb}{0,0,0.95}
+\definecolors{blackcolor}{rbg}{0.95,0.95,0.92}
+\lstdefinestyle{mystyle}{
+    backgroundcolor = \color{backcolor}
+    commentstyle= \color{codegreen}
+    }
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+%Circuit Drawings
+\usepackage{tikz}
+\usepackage[american]{circuitikz}
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{Adriana Oliveira}
+\fancyhead[R]{ECE351}
+\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+\title{ 
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{ECE351-51: Lab 11}} 
+		\HRule{2pt} \\ [0.5cm]
+		\normalsize\textsc{November 19, 2019} \vspace*{5\baselineskip}}
+
+\date{}
+\author{\normalsize
+		Submitted By: \\
+		\normalsize Adriana Oliveira\\}
+
+\maketitle
+
+\newpage
+
+\sectionfont{\scshape}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Introduction %%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+This lab analyzes the transfer function of a given causal function in the z-domain using Python functions and a function developed by Christopher Felton.
+ \par
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Methodology%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Methodology}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+\sectionfont{\scshape}
+
+We were given the following causal function with y[k] as the output and x[k] as the input and no initial conditions. 
+
+$$y[k] = 2x[k]-40x[k-1]+10y[k-1]-16y[k-2]$$
+
+We wrote the function in the z-domain and solved for H(z) using partial fractions. Using a z-transform table we also solved for h[k]. The work involved can be seen in our equations portion.\par
+
+To verify that our partial fraction calculations were accurate, we input the numerator and denominator of H(z) into scipy.signal.residuez(). This produced the poles and zeros of H(z) which were equivalent to our partial fractions. 
+
+\begin{lstlisting}[language=Python, caption= Partial fraction check]
+num = [2, -40]
+den = [1, -10, 16]
+sig.residuez(num,den)
+\end{lstlisting}
+
+\vspace{.5cm}
+Next, we used the code written by Christopher Felton to plot the poles and zeros of H(z). 
+
+\vspace{.5cm}
+
+Lastly, we plotted the magnitude and phase of H(z) using scipy.signal.freqz(). As instructed, within the function we set whole = True. 
+\begin{lstlisting}[language=Python, caption= Partial fraction check]
+w, h = scipy.signal.freqz(num, den, whole = True)
+\end{lstlisting}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Results}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+Our hand calculations produced the following transfer function.
+
+$$H(z) = \frac{A}{z-8} + \frac{B}{z-2} =\frac{-4z}{z-8} + \frac{6z}{z-2}$$
+
+$$h[k] = -4(8^{k})u[k] + 6(2^{k})u[k]$$
+
+Using sig.residuez() we found that the following zeros and poles of H(z):\par 
+
+(array([ 6., -4.]), array([2., 8.]), array([0.]))\par
+\vspace{.5cm}
+
+Notice that our zeros, A and B from our partial fraction calculation, are equal to the first array. The second array represents the poles of H(s). These also match our hand calculations. These poles are zeros produce the following graph.\par
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\linewidth]{poles_zeros_graph.png}
+    \caption{Poles and Zeros}
+    \label{fig:my_label}
+\end{figure}
+
+Notice that our poles are outside of our unit circle. This indicates that H(z) is unstable.\par
+
+Our last task was to plot the magnitude and phase of H(z). This produced the following graphs. 
+
+\begin{figure}[ht!]
+     \begin{center}
+     \begin{subfigure}[t]{.4\linewidth}
+        \includegraphics[width=\linewidth]{phase.png}
+        \caption{Phase H(z)}
+        \label{fig:my_label}
+        \end{subfigure}
+     \begin{subfigure}[t]{.4\linewidth}
+        \includegraphics[width=\linewidth]{magnitude.png}
+        \caption{Magnitude H(z)}
+        \label{fig:my_label}    
+        \end{subfigure}
+        \end{center}
+\end{figure}
+
+Notice that H(z) filters out certain frequencies. The drop in the magnitude plot leads to this being a band reject filter.\par
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Equations%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Equations}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+Given the following casual function with no initial conditions, we solved for H(z)
+$$y[k] = 2x[k]-40x[k-1]+10y[k-1]-16y[k-2]$$
+
+First, we converted to the z-domain and set Y(z) and X(z) terms on separate sides. 
+$$Y(z) - 10[z^{-1}Y(z) + 0] + 16[z^{-2}Y(z) +0z^{-1} + 0] = 2X(z) -40[z^{-1}X(z) + 0]$$ 
+ 
+Next, we solved for H(z) using partial fractions 
+$$H(z) = \frac{Y(z)}{X(z)} = \frac{2-40z^{-1}}{1 -10z^{-1} + 16z^{-2}} ]$$
+
+$$= \frac{2z(z-20z)}{(z-8)(z-2)} $$
+
+$$A = \frac{2z(z-20z)}{(z-2)} \bigg\rvert_{z = 8} = -4$$
+$$B = \frac{2z(z-20z)}{(z-8)} \bigg\rvert_{z = 2} = 6$$
+
+$$H(z) = \frac{A}{z-8} + \frac{B}{z-2} =\frac{-4z}{z-8} + \frac{6z}{z-2}$$
+
+Using a z-transform table, we solved h[k].
+$$h[k] = -4(8^{k})u[k] + 6(2^{k})u[k]$$
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Conclusion %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Conclusion}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+This lab refreshed out ability to create partial fractions in the z domain. We were also able to graph our resulting zeros and poles using the Christopher Felton function. Lastly, we contemplated the filter type of our transfer function based on its magnitude and phase. 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Questions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Questions}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+\textbf{Looking at the plot generated in Task 4, is H(z) stable? Explain why or why not.}\par
+
+\vspace{.5cm}
+It is unstable because our poles are not located within the unit circle. This is necessary for a casual function because the transfer function is the z transform of the impulse response. When there is a pole outside of the unit circle in the z-domain, the impulse response will have an exponentially increasing component. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section*{Appendix}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{lstlisting}[language=Python, caption= Lab 11 code]
+#%%
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.signal as sig
+import scipy
+import control
+import control as con
+
+#%%
+#Consider the causal function,
+#y[k] = 2x[k] − 40x[k − 1] + 10y[k − 1] − 16y[k − 2],
+#where y[k] is the output and x[k] is the input. Assume that the system is initally at rest
+
+num = [2, -40]
+den = [1, -10, 16]
+
+sig.residuez(num,den)
+#%%
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.signal as sig
+
+#%% Zplane function
+
+#
+# Copyright (c) 2011 Christopher Felton
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# The following is derived from the slides presented by
+# Alexander Kain for CS506/606 "Special Topics: Speech Signal Processing"
+# CSLU / OHSU, Spring Term 2011.
+#
+#
+#
+# Modified by Drew Owens in Fall 2018 for use in the University of Idaho's 
+# Department of Electrical and Computer Engineering Signals and Systems I Lab
+# (ECE 351)
+#
+# Modified by Morteza Soltani in Spring 2019 for use in the ECE 351 of the U of
+# I.
+#
+# Modified by Phillip Hagen in Fall 2019 for use in the University of Idaho's  
+# Department of Electrical and Computer Engineering Signals and Systems I Lab 
+# (ECE 351)
+    
+def zplane(b,a,filename=None):
+    """Plot the complex z-plane given a transfer function.
+    """
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib import patches    
+    
+    # get a figure/plot
+    ax = plt.subplot(111)
+
+    # create the unit circle
+    uc = patches.Circle((0,0), radius=1, fill=False,
+                        color='black', ls='dashed')
+    ax.add_patch(uc)
+
+    # The coefficients are less than 1, normalize the coeficients
+    if np.max(b) > 1:
+        kn = np.max(b)
+        b = np.array(b)/float(kn)
+    else:
+        kn = 1
+
+    if np.max(a) > 1:
+        kd = np.max(a)
+        a = np.array(a)/float(kd)
+    else:
+        kd = 1
+        
+    # Get the poles and zeros
+    p = np.roots(a)
+    z = np.roots(b)
+    k = kn/float(kd)
+    
+    # Plot the zeros and set marker properties    
+    t1 = plt.plot(z.real, z.imag, 'o', ms=10,label='Zeros')
+    plt.setp( t1, markersize=10.0, markeredgewidth=1.0)
+
+    # Plot the poles and set marker properties
+    t2 = plt.plot(p.real, p.imag, 'x', ms=10,label='Poles')
+    plt.setp( t2, markersize=12.0, markeredgewidth=3.0)
+
+    ax.spines['left'].set_position('center')
+    ax.spines['bottom'].set_position('center')
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    
+    plt.legend()
+
+    # set the ticks
+    # r = 1.5; plt.axis('scaled'); plt.axis([-r, r, -r, r])
+    # ticks = [-1, -.5, .5, 1]; plt.xticks(ticks); plt.yticks(ticks)
+
+    if filename is None:
+        plt.show()
+    else:
+        plt.savefig(filename)
+    
+    return z, p, k
+    
+#%%
+r, p, k = zplane(num,den)
+
+#%%
+#plot the magnitude and phase responses of H(z)
+
+w, h = scipy.signal.freqz(num, den, whole = True)
+
+myFigSize = (12,8)
+plt.figure(figsize=myFigSize)
+plt.plot(w, np.abs(h))
+plt.grid(True)
+plt.xlabel('w(rad/s)')
+plt.ylabel('|H(jw)|(db)')
+plt.title('Magnitude of H(z)')
+
+myFigSize = (12,8)
+plt.figure(figsize=myFigSize)
+plt.plot(w, np.angle(h))
+plt.grid(True)
+plt.xlabel('w(rad/s)')
+plt.ylabel('phase H(jw)(db)')
+plt.title('Phase of H(z)')
+#%%
+\end{lstlisting}
+
+
+\end{document}
