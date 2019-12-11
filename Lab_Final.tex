@@ -1,0 +1,438 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Adriana Oliveira
+%ECE 351-51
+%Lab: 11
+%Due date: 11/19/2019
+%notes:  z- domain
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{report}
+\usepackage[a4paper]{geometry}
+\usepackage[myheadings]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{graphicx, wrapfig, subcaption, setspace, booktabs}
+\usepackage[T1]{fontenc}
+\usepackage[font=small, labelfont=bf]{caption}
+
+\usepackage{fourier}
+\usepackage[protrusion=true, expansion=true]{microtype}
+\usepackage[english]{babel}
+\usepackage{sectsty}
+\usepackage{url, lipsum}
+\usepackage{indentfirst}
+\usepackage{listings}
+
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\onehalfspacing
+\setcounter{tocdepth}{5}
+\setcounter{secnumdepth}{5}
+
+%Circuit Drawings
+\usepackage{tikz}
+\usepackage[american]{circuitikz}
+
+%-------------------------------------------------------------------------------
+% HEADER & FOOTER
+%-------------------------------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\setlength\headheight{15pt}
+\fancyhead[L]{Adriana Oliveira}
+\fancyhead[R]{ECE351}
+\fancyfoot[R]{Page \thepage\ of \pageref{LastPage}}
+%-------------------------------------------------------------------------------
+% TITLE PAGE
+%-------------------------------------------------------------------------------
+
+\begin{document}
+
+\title{ 
+		\\ [2.0cm]
+		\HRule{0.5pt} \\
+		\LARGE \textbf{\uppercase{ECE351-51: Lab Final}} 
+		\HRule{2pt} \\ [0.5cm]
+		\normalsize\textsc{December 10, 2019} \vspace*{5\baselineskip}}
+
+\date{}
+\author{\normalsize
+		Submitted By: \\
+		\normalsize Adriana Oliveira\\}
+
+\maketitle
+
+\newpage
+
+\sectionfont{\scshape}
+%%%%%%%%%% Introduction %%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Introduction}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+We were tasked with designing a filter to improve the feedback signal to the re-positioning system of a landing gear. We were informed that high frequencies from  its switching amplifier and low frequency vibrations from the building’s ventilation system cause the noisy signal to range from 1.8kHz to 2.0kHz. Our goal is to find the frequency of our clean signal and filter out all other noise. This will allow accurate readings from the re-positioning system to produce safe and effective landing gear system. 
+ \par
+ 
+ %%%%%%%%%%%%% Methodology %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Methodology}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+\sectionfont{\scshape}
+
+We were given a noisy signal through a CSV file. When plotted it looks as follows. 
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\linewidth]{Signal.png}
+    \caption{Noisy feedback signal}
+    \label{fig:my_label}
+\end{figure}
+
+\newpage
+To find the frequencies within the noisy signal, we first ran the signal through a fast Fourier transform function created in lab 9. To plot fft stem plots in a timely manner, we were provided a function called make\_stem. To understand the scope of the signals at hand, we zoomed in and plotted the higher and lower frequency noises as well as our target frequency. This helped us to fully understand which frequencies should be attenuated.\par 
+
+Our next task was to create a filter. According to our fft, we only want to filter in signals at about 1.9 kHz. This would call for a bandbass filter that targets this frequency and has a proper bandwidth size to meet the attenuation requirements for the lower and higher frequency signals. 
+
+A single phase Butterworth bandpass filter design from lab 10 was reused with different values to create our filter. This involved finding the transfer function and comparing it to the basic bandpass formula from circuits II to solve for our unknown inductor, capacitor, and resistor. Using a set value for the inductor and our desired frequency of 1.9 kHz a value for the capacitor was found. Using this value and adjusting the bandpass value, a value for R was found. The calculations for each part can be found in equations. 
+
+\begin{center}
+\begin{circuitikz}[american voltages]
+\draw (0,0)
+    to [V = $Vin$, invert] (0,2)
+    to [R = $R1$] (2,2)
+    to [L = $L$] (2,0);
+\draw (0,0)
+    to [short] (4,0)
+    to [C = $C$] (4,2)
+    to [short] (2,2);
+\draw (4,2)
+    to [short] (5,2);
+\draw (4,0)
+    to [short] (5,0)
+    to[open, v<=$Vout$] (5,2);
+\end{circuitikz}
+\end{center}
+
+Con.bode was used to create a full bode plot for our filter design. Extra plots were made to show how the filter evaluated lower, higher, and target frequencies. There was a little play involved in creating a filter that attenuated to the specification of the lab handout. The target frequency had to be attenuated at -0.3dB, the low-frequency vibration at -30dB, and the switching amplifier noise at -21dB. To achieve the requirements, the value of the bandwidth was altered and R was solved for until the resulting filter met the needed requirements. With a bandpass of 1.1 kHz, the resulting circuit values are as follows:\par
+
+
+\begin{center}
+\textbf{Circuit Values}\par
+    L = 200mH, C = 35.1 nF, R = 4122 Ohms. 
+\end{center} 
+
+\clearpage
+%%%%%%%%% Results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Results}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=.75\linewidth]{fft_all.png}
+    \caption{FFT of Noisy Signal}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=.75\linewidth]{fft_low.png}
+    \caption{FFT Lower Frequency}
+    \label{fig:my_label}
+\end{figure}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=.75\linewidth]{fft_middle.png}
+    \caption{FFT Target Frequency}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=.75\linewidth]{fft_high.png}
+    \caption{FFT High Frequency}
+    \label{fig:my_label}
+\end{figure}
+
+The fft for this signal shows that lower frequency noise is less than 100 Hz, our target frequency is at 1.9 kHz, and high frequency noise is at about 50 kHz. These values will be evaluated on our bode plots to ensure their compliance with the design limits. \par 
+\clearpage
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=.75\linewidth]{Bode_all.png}
+    \caption{Complete Bode Plot}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=.75\linewidth]{Bode_low.png}
+    \caption{Low Frequency Bode Plot}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=.75\linewidth]{Bode_center.png}
+    \caption{Target Frequency Bode Plot}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=.75\linewidth]{Bode_high.png}
+    \caption{High Frequency Bode Plot}
+    \label{fig:my_label}
+\end{figure}
+\clearpage
+
+The final values selected for the circuit filter allowed all frequencies to be attenuated to the recommended values. Frequencies less than 100 Hz were attenuated at less than -30 dB. The target frequency of 1.9 kHz was attenuated at much less than -0.3 dB. High frequencies at 50 kHz were also attenuated at less than -21 dB.\par
+
+Our filter design produced the following clean signal. Comparing it with the original signal, you can see that noisy signals with frequencies outside of our bandwidth have fallen out. The signal produced has been full attenuated and is now suitable to be used in our gear re-positioning system. 
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=.75\linewidth]{Signal_filtered.png}
+    \caption{Signal through Bandpass filter}
+    \label{fig:my_label}
+\end{figure}
+
+\clearpage
+%%%%%%%%%%%%% Equations %%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Equations}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{center}
+    \textbf{Transfer function from our filter design}
+    $$H(s) = \frac{kBs}{s^{2} + Bs + w^{2}}$$
+    $$H(s) = \frac {\frac{s}{RC}} {s^{2} + \frac {s}{RC} + \frac{1}{LC}} $$
+\end{center} 
+
+\begin{center}
+    \textbf{Choose a value for L and solve for C}
+    $$W^{2} = \frac{1}{LC}$$
+    L = 200 mH, C = 35.1 nF
+\end{center} 
+
+\begin{center}
+    \textbf{Choose a value for the bandwidth and solve for R}
+    $$B = \frac{1}{RC}$$
+    B = 1.1 kHz, R = 4122 Ohms
+\end{center} 
+
+%%%%%%%%%%%%%%%%%% Conclusion %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Conclusion}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+This lab reviewed concepts from past labs using a real world scenario. We were able to determine the frequency requirements of our filter using fft plots. We used this data to design a filter to that meet those needs. We verified our design by creating bode plots and checking out of boundary frequencies. Our filter design produced a properly filtered and fully attenuated signal that could be used by the gear re-positioning system to make accurate estimations. 
+
+
+\newpage
+%%%%%%%%%%%%%%%%%% Questions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Questions}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+\textbf{Earlier this semester, you were asked what you personally wanted to get out of taking this
+course. Do you feel like that personal goal was met? Why or why not?}\par
+
+\vspace{.5cm}
+I wanted to learn the basics of Python and it's real world applications. I feel a lot more confident with my abilities to program and I've been given a tool that I can use when I get stuck on homework or want to visualize something we learned in class. 
+
+%%%%%%%%%%%%%%%%%%%%%% Appendix %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\section*{Appendix}
+\hrule
+\vspace{1cm}
+\setlength{\parindent}{5ex}
+
+\begin{lstlisting}[language=Python, caption= Lab 6 code]
+#%%
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.signal as sig
+import scipy
+import control
+import control as con
+import pandas as pd
+#%%
+
+fs = 1e6
+Ts = 1/fs
+t_end = 50e-3
+t = np.arange (0,t_end-Ts,Ts)
+
+# load input signal
+df = pd.read_csv ('NoisySignal.csv')
+
+t = df ['0'].values
+sensor_sig = df ['1'].values
+plt.figure(figsize = (10 , 7) )
+plt.plot (t, sensor_sig )
+plt.grid ()
+plt.title ('Noisy Input Signal')
+plt.xlabel ('Time [s]')
+plt.ylabel ('Amplitude [V]')
+plt.show ()
+
+#%%
+# User defined clean fft function 
+def clean_fft(x,fs):
+    
+    N = len( x ) # find the length of the signal
+    X_fft = scipy.fftpack.fft ( x ) # perform the fast Fourier transform (fft)
+    X_fft_shifted = scipy.fftpack.fftshift ( X_fft )    # shift zero frequency components
+                                                            # to the center of the spectrum
+
+    freq = np.arange ( - N /2 , N /2) * fs / N        # compute the frequencies for the output
+                                                        # signal , (fs is the sampling frequency and
+                                                        # needs to be defined previously in your code
+    X_mag = np.abs( X_fft_shifted ) / N # compute the magnitudes of the signal
+    X_phi = np.angle ( X_fft_shifted ) # compute the phases of the signal
+    for i in range(len(X_mag)):
+        if np.abs(X_mag[i]) < 1e-10:
+            X_phi[i] = 0
+    return (freq, X_mag, X_phi)
+
+#%%
+# Work- Around
+def make_stem ( ax ,x ,y , color ='k', style ='solid', label ='', linewidths =2.5 ,** kwargs) :
+    ax.axhline ( x [0] , x [ -1] ,0 , color ='r')
+    ax.vlines (x , 0 ,y , color = color , linestyles = style , label = label , linewidths = linewidths )
+    ax.set_ylim ([1.05* y . min () , 1.05* y . max () ])
+#%%
+# FFT plots
+(freq, X_mag, X_phi) = clean_fft(sensor_sig,fs) 
+
+# All frequencies
+fig, ax1 = plt.subplots( figsize =(10,7) )
+make_stem(ax1,freq,X_mag)
+plt.xlim(-10000, 500e3)
+plt.grid(True)
+plt.xlabel('w (Hz)')
+plt.ylabel('H(jw) dB')
+plt.title('Total_signal fft')
+plt.show()
+#%%
+# Low frequencies
+fig, ax1 = plt.subplots( figsize =(10,7) )
+make_stem(ax1,freq,X_mag)
+plt.grid(True)
+plt.xlim(1e0, 1800)
+plt.xlabel('w (Hz)')
+plt.ylabel('H(jw) dB')
+plt.title('Total_signal Low Frequencies')
+plt.show()
+
+#%%
+# High frequencies
+fig, ax1 = plt.subplots( figsize =(10,7) )
+make_stem(ax1,freq,X_mag)
+plt.grid(True)
+plt.xlim(2000, 500e3)
+plt.xlabel('w (Hz)')
+plt.ylabel('H(jw) dB')
+plt.title('Total_signal High Frequencies')
+plt.show()
+
+
+#%%
+# Middle frequencies
+fig, ax1 = plt.subplots( figsize =(10,7) )
+make_stem(ax1,freq,X_mag)
+plt.grid(True)
+plt.xlim(1800, 2000)
+plt.xlabel('w (Hz)')
+plt.ylabel('H(jw) dB')
+plt.title('Total_signal Middle Frequencies')
+plt.show()
+#%%
+# Transfer Function for filter 
+steps = 1e0
+w = np.arange(1e0, fs ,steps)
+R = 4122
+L = 200e-3
+C =35.1e-9
+
+num = [(1/(R*C)), 0]
+den = [1, (1/(R*C)), (1/(L*C))]
+
+mag_H = (w/(R*C)) / np.sqrt(( ((1/(L*C)) - (w**2) )**2) + (w/(R*C))**2)
+db_mag_H = 20*np.log10(mag_H)
+
+phase_H = ((.5*np.pi) - np.arctan( (w/(R*C)) / ((1/(L*C)) - (w**2)))) 
+
+for i in range(len(w)):
+    if ( ( (1/(L*C)) - w[i]**2 ) < 0 ):
+        phase_H[i] -= np.pi
+
+# Bode Plots
+
+# All frequencies
+plt.figure(figsize=(10,7))
+plt.title('Bode Plot at all Frequencies')
+sys = con.TransferFunction(num, den)
+_= con.bode(sys, w, Hz=True, dB=True, deg=True, Plot=True)
+plt.show()
+
+# Low Frequencies
+w = np.arange(1e0, 1800+steps,steps)*2*np.pi
+plt.figure(figsize=(10,7))
+plt.title('Bode Plot at Low Frequencies')
+sys = con.TransferFunction(num, den)
+_= con.bode(sys, w, Hz=True, dB=True, deg=True, Plot=True)
+plt.show()
+
+# Middle Frequencies
+w = np.arange(1800, 2000+steps,steps)*2*np.pi
+plt.figure(figsize=(10,7))
+plt.title('Bode Plot at Middle Frequencies')
+sys = con.TransferFunction(num, den)
+_= con.bode(sys, w, Hz=True, dB=True, deg=True, Plot=True)
+plt.show()
+
+# High Frequencies
+w = np.arange(2000, fs+steps,steps)*2*np.pi
+plt.figure(figsize=(10,7))
+plt.title('Bode Plot at High Frequencies')
+sys = con.TransferFunction(num, den)
+_= con.bode(sys, w, Hz=True, dB=True, deg=True, Plot=True)
+plt.show()
+
+# Pass through Bandpass RLC circuit 
+
+# z-domain equivalent of x
+numX, denX = sig.bilinear(num, den, fs)
+#Pass through filter
+y = sig.lfilter(numX, denX, sensor_sig)
+
+myFigSize = (12,8)
+plt.figure(figsize=myFigSize)
+plt.plot(t, y)
+plt.grid(True)
+plt.title('Output Signal y(t) through RLC Filter')
+plt.xlabel('t(s)')
+plt.ylabel('y(t)')
+
+# %%
+# FFT of filtered signal
+clean_sig = y
+(freq, X_mag, X_phi) = clean_fft(clean_sig,fs) 
+
+# All frequencies
+fig, ax1 = plt.subplots( figsize =(10,7) )
+make_stem(ax1,freq,X_mag)
+plt.xscale('log')
+plt.xlim(1e0, fs)
+plt.xlabel('w (Hz)')
+plt.ylabel('H(jw) dB')
+plt.title('Total_signal fft')
+plt.show()
+
+# %%
+\end{lstlisting}
+\end{document}
